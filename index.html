@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sinclair Sound Design Library</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Sinclair Sound Design Library</h1>
+        <div id="stats">Loading library...</div>
+    </header>
+
+    <main class="search-only-layout">
+        <div class="search-bar-fixed">
+            <input type="text" id="searchInput" placeholder="Search 41,000+ sounds (e.g., 'Wind', 'Explosion', '96kHz')...">
+        </div>
+        
+        <div id="results">
+            </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+    <script src="script.js"></script>
+
+</body>
+</html>
