@@ -104,7 +104,7 @@ header h1 {
 
 .card:hover { 
     border-left-color: var(--sinclair-blue);
-    transform: scale(105%);
+    transform: scale(102%);
     background-color: #fdfdfd;
 }
 
