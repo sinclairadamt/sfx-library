@@ -86,12 +86,19 @@ function displayResults(items) {
             displayPath = "Root Directory";
         }
 
+        // 4. Clean up the filename for the UI
+        let displayName = item.n;
+        const lastDotIndex = item.n.lastIndexOf('.');
+        if (lastDotIndex > 0) {
+            displayName = item.n.substring(0, lastDotIndex);
+        }
+
         return `
             <div class="card">
                 <div class="info">
                     <div class="title-row">
                         <span class="file-badge">${ext}</span>
-                        <span class="name" title="${item.n}">${item.n}</span>
+                        <span class="name" title="${item.n}">${displayName}</span>
                     </div>
                     <div class="path">${displayPath}</div>
                 </div>
