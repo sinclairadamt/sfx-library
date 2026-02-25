@@ -72,8 +72,19 @@ function displayResults(items) {
 
         // 3. Clean up the display path for the UI
         let displayPath = item.p.replace("Sinclair/SFX Libraries", "");
-        // Remove any leading slashes or double slashes that get left behind
-        displayPath = displayPath.replace(/^\/+/, "").replace(/\/\//g, "/");
+        
+        // Remove the filename from the end of the path
+        if (displayPath.endsWith(item.n)) {
+            displayPath = displayPath.substring(0, displayPath.length - item.n.length);
+        }
+
+        // Remove any leading/trailing slashes or double slashes
+        displayPath = displayPath.replace(/^\/+|\/+$/g, "").replace(/\/\//g, "/");
+
+        // Optional: If the path is empty (meaning it was in the root), show a fallback
+        if (!displayPath) {
+            displayPath = "Root Directory";
+        }
 
         return `
             <div class="card">
