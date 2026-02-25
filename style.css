@@ -62,10 +62,10 @@ header h1 {
 #searchInput { 
     width: 100%; 
     max-width: 800px;
-    padding: 14px 25px; 
+    padding: 10px 20px; 
     font-size: 18px; 
     border: 2px solid var(--sinclair-blue);
-    border-radius: 50px; 
+    border-radius: 20px; 
     outline: none;
     transition: all 0.3s ease;
 }
