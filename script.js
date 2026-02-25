@@ -59,7 +59,7 @@ function displayResults(items) {
     container.innerHTML = items.map(item => {
         const ext = item.n.split('.').pop().toUpperCase();
 
-        // 1. Reconstruct the original SharePoint URL
+        // 1. Reconstruct the original SharePoint URL (Requires original path)
         const baseUrl = "https://sinclaircc-my.sharepoint.com/personal/adam_thompson7572_sinclair_edu/Documents/";
         
         // encodeURIComponent turns spaces into %20 and slashes into %2F, matching Microsoft's format exactly
@@ -70,6 +70,11 @@ function displayResults(items) {
         const previewUrl = originalUrl + "?download=1";
         const dlUrl = `https://sinclaircc-my.sharepoint.com/personal/adam_thompson7572_sinclair_edu/_layouts/15/download.aspx?SourceUrl=${originalUrl}`;
 
+        // 3. Clean up the display path for the UI
+        let displayPath = item.p.replace("Sinclair/SFX Libraries", "");
+        // Remove any leading slashes or double slashes that get left behind
+        displayPath = displayPath.replace(/^\/+/, "").replace(/\/\//g, "/");
+
         return `
             <div class="card">
                 <div class="info">
@@ -77,7 +82,7 @@ function displayResults(items) {
                         <span class="file-badge">${ext}</span>
                         <span class="name" title="${item.n}">${item.n}</span>
                     </div>
-                    <div class="path">${item.p}</div>
+                    <div class="path">${displayPath}</div>
                 </div>
                 <div class="actions">
                     <a href="${previewUrl}" target="_blank" class="dl-btn preview-btn">▶ Preview</a>
