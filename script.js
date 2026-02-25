@@ -79,8 +79,8 @@ function displayResults(items) {
                     </div>
                     <div class="path">${item.p}</div>
                 </div>
-                <div class="actions" style="display: flex; gap: 10px;">
-                    <a href="${previewUrl}" target="_blank" class="dl-btn" style="background: #444;">▶ Preview</a>
+                <div class="actions">
+                    <a href="${previewUrl}" target="_blank" class="dl-btn preview-btn">▶ Preview</a>
                     <a href="${dlUrl}" class="dl-btn">⬇ Download</a>
                 </div>
             </div>

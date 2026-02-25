@@ -104,6 +104,7 @@ header h1 {
 
 .card:hover { 
     border-left-color: var(--sinclair-blue);
+    transform: scale(105%);
     background-color: #fdfdfd;
 }
 
@@ -147,23 +148,11 @@ header h1 {
     word-break: break-all;
 }
 
-/* --- Audio Player Styling --- */
-.player-container {
-    width: 100%;
-    max-width: 500px;
-}
-
-audio {
-    width: 100%;
-    height: 32px;
-    border-radius: 4px;
-    /* This filter makes the standard player look a bit more "pro" */
-    filter: brightness(0.95) contrast(1.1); 
-}
-
 /* --- Actions/Download Button --- */
 .actions {
     flex-shrink: 0;
+    display: flex; 
+    gap: 10px;
 }
 
 .dl-btn { 
@@ -176,11 +165,23 @@ audio {
     font-size: 0.85em;
     white-space: nowrap;
     transition: background 0.2s;
-    display: inline-block;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    gap: 6px;
 }
 
 .dl-btn:hover { 
     background: #005f8d; 
+}
+
+/* Modifier for the Preview Button */
+.preview-btn {
+    background: #444;
+}
+
+.preview-btn:hover {
+    background: #222;
 }
 
 /* --- Scrollbar Styling --- */
