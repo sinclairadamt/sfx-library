@@ -56,24 +56,31 @@ header h1 {
     z-index: 10;
 }
 
-/* --- NEW: Search Wrapper & Clear Button --- */
+/* --- Layout for Input + Search Button --- */
+.search-container {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
 .search-input-wrapper {
     position: relative;
-    width: 100%;
-    max-width: 800px;
-    margin: 0 auto; /* Centers the wrapper horizontally */
+    flex: 1; 
 }
 
 #searchInput { 
     width: 100%; 
     max-width: 800px;
-    padding: 10px 30px 10px 20px; /* Added extra padding on the right so text doesn't hit the X */
+    padding: 10px 45px 10px 20px; /* Adjusted right padding for the X button */
     font-size: 18px; 
     border: 2px solid var(--sinclair-blue);
     border-radius: 20px; 
     outline: none;
     transition: all 0.3s ease;
-    box-sizing: border-box; /* Ensures padding doesn't break the width */
+    box-sizing: border-box; 
 }
 
 #searchInput:focus {
@@ -91,7 +98,7 @@ header h1 {
     font-size: 24px;
     color: #999;
     cursor: pointer;
-    display: none; /* Hidden by default */
+    display: none; 
     padding: 0;
     line-height: 1;
     transition: color 0.2s;
@@ -99,6 +106,43 @@ header h1 {
 
 .clear-btn:hover {
     color: var(--text-main);
+}
+
+.search-btn {
+    background: var(--sinclair-blue);
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    font-size: 18px;
+    border-radius: 20px; /* Matched your input border radius */
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s, transform 0.1s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.search-btn:hover {
+    background: #005f8d;
+}
+
+.search-btn:active {
+    transform: scale(0.97);
+}
+/* ------------------------------------------- */
+
+/* --- NEW: Loading Spinner Animation --- */
+.spinner {
+    border: 3px solid #e9ecef;
+    border-top: 3px solid var(--sinclair-blue);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 /* ------------------------------------------- */
 
