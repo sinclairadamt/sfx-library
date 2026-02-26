@@ -76,28 +76,47 @@ header h1 {
     border-color: #005f8d;
 }
 /* --- Search Tips Styling --- */
-.search-tips {
-    margin-top: 12px;
-    font-size: 0.85em;
-    color: var(--text-muted);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-    flex-wrap: wrap;
+.search-input-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto; /* Centers the wrapper horizontally */
 }
 
-.search-tips strong {
-    color: var(--sinclair-blue);
+#searchInput { 
+    width: 100%; 
+    padding: 14px 45px 14px 25px; /* Added extra padding on the right so text doesn't hit the X */
+    font-size: 18px; 
+    border: 2px solid var(--sinclair-blue);
+    border-radius: 50px; 
+    outline: none;
+    transition: all 0.3s ease;
+    box-sizing: border-box; /* Ensures padding doesn't break the width */
 }
 
-.search-tips code {
-    background: #e9ecef;
-    color: #d63384; /* Gives the syntax a nice, distinct color */
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-family: 'Courier New', Courier, monospace;
-    font-weight: bold;
+#searchInput:focus {
+    box-shadow: 0 0 15px rgba(0,123,184,0.2);
+    border-color: #005f8d;
+}
+
+.clear-btn {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #999;
+    cursor: pointer;
+    display: none; /* Hidden by default */
+    padding: 0;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.clear-btn:hover {
+    color: var(--text-main);
 }
 /* --- Results Area --- */
 #results { 
