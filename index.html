@@ -3,22 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sinclair Sound Design Library</title>
+    <title>Sinclair Sound Library</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 </head>
 <body>
     <header>
-        <h1>Sinclair Sound Design Library</h1>
+        <h1>Sinclair Sound Library</h1>
         <div id="stats">Loading Library...</div>
     </header>
 
     <div class="search-only-layout">
         <div class="search-bar-fixed">
             
-            <div class="search-input-wrapper">
-                <input type="text" id="searchInput" placeholder="Search for sounds (e.g., rain, wind, foley)..." autocomplete="off">
-                <button id="clearSearch" class="clear-btn" aria-label="Clear search">&times;</button>
+            <div class="search-container">
+                <div class="search-input-wrapper">
+                    <input type="text" id="searchInput" placeholder="Search for sounds (e.g., rain, wind, foley)..." autocomplete="off">
+                    <button id="clearSearch" class="clear-btn" aria-label="Clear search">&times;</button>
+                </div>
+                <button id="searchBtn" class="search-btn">Search</button>
             </div>
             
             <div class="search-tips">
