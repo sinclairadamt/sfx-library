@@ -3,9 +3,7 @@ let fuse;
 
 console.log("Initializing Sound Library...");
 
-// --- NEW: Helper function to grab 50 random sounds ---
 function getRandomItems(arr, count) {
-    // Shuffles a copy of the array and slices off the desired amount
     const shuffled = [...arr].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
 }
@@ -29,7 +27,6 @@ fetch('data.json')
             useExtendedSearch: true  
         });
 
-        // Load 50 random sounds to start
         displayResults(getRandomItems(sfxData, 50), false);
     })
     .catch(err => {
@@ -42,13 +39,12 @@ fetch('data.json')
     });
 
 const searchInput = document.getElementById('searchInput');
-const clearBtn = document.getElementById('clearSearch'); // Select the X button
+const clearBtn = document.getElementById('clearSearch'); 
 
 if (searchInput) {
     searchInput.addEventListener('input', e => {
         const query = e.target.value;
         
-        // Show or hide the clear button based on input length
         if (query.length > 0) {
             clearBtn.style.display = 'block';
         } else {
@@ -57,25 +53,22 @@ if (searchInput) {
 
         if (!fuse) return;
         
-        // If search is empty or 1 letter, show 50 random items
         if (query.length < 2) {
             displayResults(getRandomItems(sfxData, 50), false);
             return;
         }
         
-        // Active search
         const results = fuse.search(query).map(r => r.item);
         displayResults(results, true); 
     });
 }
 
-// --- NEW: Event listener for the clear button ---
 if (clearBtn) {
     clearBtn.addEventListener('click', () => {
-        searchInput.value = '';             // Empty the text
-        clearBtn.style.display = 'none';    // Hide the X
-        displayResults(getRandomItems(sfxData, 50), false); // Reshuffle 50 sounds
-        searchInput.focus();                // Put the typing cursor back in the box
+        searchInput.value = '';             
+        clearBtn.style.display = 'none';    
+        displayResults(getRandomItems(sfxData, 50), false); 
+        searchInput.focus();                
     });
 }
 
@@ -92,12 +85,36 @@ function displayResults(items, isSearch = false) {
     if (isSearch) {
         summaryHtml = `<div style="width: 100%; max-width: 900px; text-align: left; color: var(--text-muted); font-size: 0.85em; margin-bottom: 5px; padding-left: 5px; font-weight: bold;">Found ${items.length.toLocaleString()} result${items.length === 1 ? '' : 's'}</div>`;
     } else {
-        // Updated text to reflect the new random behavior
         summaryHtml = `<div style="width: 100%; max-width: 900px; text-align: left; color: var(--text-muted); font-size: 0.85em; margin-bottom: 5px; padding-left: 5px; font-style: italic;">Showing 50 random sounds to spark your creativity. Use the search bar to find more!</div>`;
     }
 
     const cardsHtml = items.map(item => {
         const ext = item.n.split('.').pop().toUpperCase();
+
+        // --- VISUAL PATH CLEANUP ---
+        let displayPath = item.p;
+        
+        // 1. Remove the Sinclair prefix
+        const prefix = "Sinclair/SFX Libraries/";
+        if (displayPath.startsWith(prefix)) {
+            displayPath = displayPath.slice(prefix.length);
+        }
+        
+        // 2. Remove the filename from the end
+        if (displayPath.endsWith(item.n)) {
+            displayPath = displayPath.slice(0, -item.n.length);
+        }
+        
+        // 3. Remove trailing slash if it exists
+        if (displayPath.endsWith('/')) {
+            displayPath = displayPath.slice(0, -1);
+        }
+        
+        // 4. Fallback if the file is sitting right in the root library folder
+        if (displayPath === "") {
+            displayPath = "Main Folder";
+        }
+        // ---------------------------
 
         const baseUrl = "https://sinclaircc-my.sharepoint.com/personal/adam_thompson7572_sinclair_edu/Documents/";
         const encodedPath = encodeURIComponent(item.p); 
@@ -113,7 +130,7 @@ function displayResults(items, isSearch = false) {
                         <span class="file-badge">${ext}</span>
                         <span class="name" title="${item.n}">${item.n}</span>
                     </div>
-                    <div class="path">${item.p}</div>
+                    <div class="path">${displayPath}</div>
                 </div>
                 <div class="actions">
                     <a href="${previewUrl}" target="_blank" class="dl-btn preview-btn">▶ Preview</a>
