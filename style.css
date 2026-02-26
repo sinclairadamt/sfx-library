@@ -75,7 +75,30 @@ header h1 {
     box-shadow: 0 0 15px rgba(0,123,184,0.2);
     border-color: #005f8d;
 }
+/* --- Search Tips Styling --- */
+.search-tips {
+    margin-top: 12px;
+    font-size: 0.85em;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
 
+.search-tips strong {
+    color: var(--sinclair-blue);
+}
+
+.search-tips code {
+    background: #e9ecef;
+    color: #d63384; /* Gives the syntax a nice, distinct color */
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+}
 /* --- Results Area --- */
 #results { 
     flex: 1; 
