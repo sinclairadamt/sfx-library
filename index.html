@@ -5,25 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sinclair Sound Design Library</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 </head>
 <body>
-
     <header>
         <h1>Sinclair Sound Design Library</h1>
-        <div id="stats">Loading library...</div>
+        <div id="stats">Loading Library...</div>
     </header>
 
-    <main class="search-only-layout">
+    <div class="search-only-layout">
         <div class="search-bar-fixed">
-            <input type="text" id="searchInput" placeholder="Search 40,000+ sounds (e.g., 'Wind', 'Explosion', '96kHz')...">
+            <input type="text" id="searchInput" placeholder="Search for sounds (e.g., rain, wind, foley)..." autocomplete="off">
+            
+            <div class="search-tips">
+                <strong>Pro Tips:</strong> 
+                <span title="Include exact word"><code>'rain</code> (Include)</span>
+                <span title="Exclude this word"><code>!music</code> (Exclude)</span>
+                <span title="Strict exact match"><code>=thunder</code> (Exact)</span>
+                <span title="Starts with this word"><code>^glass</code> (Starts With)</span>
+            </div>
         </div>
         
-        <div id="results">
-            </div>
-    </main>
+        <div id="results"></div>
+    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
     <script src="script.js"></script>
-
 </body>
 </html>
