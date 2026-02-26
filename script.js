@@ -40,27 +40,54 @@ fetch('data.json')
 
 const searchInput = document.getElementById('searchInput');
 const clearBtn = document.getElementById('clearSearch'); 
+const searchBtn = document.getElementById('searchBtn'); 
+
+// --- UPDATED: Search execution with loading spinner ---
+function executeSearch() {
+    if (!fuse) return;
+    
+    const query = searchInput.value;
+    
+    if (query.length < 2) {
+        displayResults(getRandomItems(sfxData, 50), false);
+        return;
+    }
+
+    // 1. Instantly display the loading spinner in the results area
+    const container = document.getElementById('results');
+    container.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center; gap: 15px; padding: 40px; color: var(--text-muted); font-size: 1.1em; font-weight: bold; width: 100%;">
+            <div class="spinner"></div> Searching library...
+        </div>
+    `;
+    
+    // 2. Pause for 50 milliseconds to let the browser draw the spinner on screen, then search
+    setTimeout(() => {
+        const results = fuse.search(query).map(r => r.item);
+        displayResults(results, true); 
+    }, 50);
+}
 
 if (searchInput) {
     searchInput.addEventListener('input', e => {
         const query = e.target.value;
-        
         if (query.length > 0) {
             clearBtn.style.display = 'block';
         } else {
             clearBtn.style.display = 'none';
         }
-
-        if (!fuse) return;
-        
-        if (query.length < 2) {
-            displayResults(getRandomItems(sfxData, 50), false);
-            return;
-        }
-        
-        const results = fuse.search(query).map(r => r.item);
-        displayResults(results, true); 
     });
+
+    searchInput.addEventListener('keypress', e => {
+        if (e.key === 'Enter') {
+            e.preventDefault(); 
+            executeSearch();
+        }
+    });
+}
+
+if (searchBtn) {
+    searchBtn.addEventListener('click', executeSearch);
 }
 
 if (clearBtn) {
@@ -91,30 +118,24 @@ function displayResults(items, isSearch = false) {
     const cardsHtml = items.map(item => {
         const ext = item.n.split('.').pop().toUpperCase();
 
-        // --- VISUAL PATH CLEANUP ---
         let displayPath = item.p;
         
-        // 1. Remove the Sinclair prefix
         const prefix = "Sinclair/SFX Libraries/";
         if (displayPath.startsWith(prefix)) {
             displayPath = displayPath.slice(prefix.length);
         }
         
-        // 2. Remove the filename from the end
         if (displayPath.endsWith(item.n)) {
             displayPath = displayPath.slice(0, -item.n.length);
         }
         
-        // 3. Remove trailing slash if it exists
         if (displayPath.endsWith('/')) {
             displayPath = displayPath.slice(0, -1);
         }
         
-        // 4. Fallback if the file is sitting right in the root library folder
         if (displayPath === "") {
             displayPath = "Main Folder";
         }
-        // ---------------------------
 
         const baseUrl = "https://sinclaircc-my.sharepoint.com/personal/adam_thompson7572_sinclair_edu/Documents/";
         const encodedPath = encodeURIComponent(item.p); 
