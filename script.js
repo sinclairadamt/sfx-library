@@ -42,7 +42,6 @@ const searchInput = document.getElementById('searchInput');
 const clearBtn = document.getElementById('clearSearch'); 
 const searchBtn = document.getElementById('searchBtn'); 
 
-// --- UPDATED: Search execution with loading spinner ---
 function executeSearch() {
     if (!fuse) return;
     
@@ -53,7 +52,6 @@ function executeSearch() {
         return;
     }
 
-    // 1. Instantly display the loading spinner in the results area
     const container = document.getElementById('results');
     container.innerHTML = `
         <div style="display: flex; align-items: center; justify-content: center; gap: 15px; padding: 40px; color: var(--text-muted); font-size: 1.1em; font-weight: bold; width: 100%;">
@@ -61,7 +59,6 @@ function executeSearch() {
         </div>
     `;
     
-    // 2. Pause for 50 milliseconds to let the browser draw the spinner on screen, then search
     setTimeout(() => {
         const results = fuse.search(query).map(r => r.item);
         displayResults(results, true); 
@@ -118,6 +115,10 @@ function displayResults(items, isSearch = false) {
     const cardsHtml = items.map(item => {
         const ext = item.n.split('.').pop().toUpperCase();
 
+        // --- NEW: Strip the extension from the display name ---
+        const lastDotIndex = item.n.lastIndexOf('.');
+        const displayName = lastDotIndex !== -1 ? item.n.substring(0, lastDotIndex) : item.n;
+
         let displayPath = item.p;
         
         const prefix = "Sinclair/SFX Libraries/";
@@ -144,12 +145,13 @@ function displayResults(items, isSearch = false) {
         const previewUrl = originalUrl + "?download=1";
         const dlUrl = `https://sinclaircc-my.sharepoint.com/personal/adam_thompson7572_sinclair_edu/_layouts/15/download.aspx?SourceUrl=${originalUrl}`;
 
+        // Notice the use of displayName in the span below!
         return `
             <div class="card">
                 <div class="info">
                     <div class="title-row">
                         <span class="file-badge">${ext}</span>
-                        <span class="name" title="${item.n}">${item.n}</span>
+                        <span class="name" title="${item.n}">${displayName}</span>
                     </div>
                     <div class="path">${displayPath}</div>
                 </div>
