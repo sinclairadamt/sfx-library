@@ -25,14 +25,29 @@
             </div>
             
             <div class="search-tips">
-                <strong>Pro Tips:</strong> 
+                <strong>Pro Tips:</strong>
                 <span title="Include exact word"><code>'rain</code> (Include)</span>
                 <span title="Exclude this word"><code>!music</code> (Exclude)</span>
                 <span title="Strict exact match"><code>=thunder</code> (Exact)</span>
                 <span title="Starts with this word"><code>^glass</code> (Starts With)</span>
             </div>
+
+            <div id="filter-row">
+                <div class="filter-group">
+                    <span class="filter-label">Category:</span>
+                    <div class="chip-group" id="cat-chips">
+                        <span class="chip-loading">Loading...</span>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <span class="filter-label">Source:</span>
+                    <div class="chip-group" id="src-chips">
+                        <span class="chip-loading">Loading...</span>
+                    </div>
+                </div>
+            </div>
         </div>
-        
+
         <div id="results"></div>
     </div>
 

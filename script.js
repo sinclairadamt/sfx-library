@@ -1,11 +1,149 @@
 let sfxData = [];
 let fuse;
 
+const fuseOptions = {
+    keys: [
+        { name: 'n',    weight: 0.35 },
+        { name: 'kw',   weight: 0.30 },
+        { name: 'tags', weight: 0.20 },
+        { name: 'cat',  weight: 0.10 },
+        { name: 'pk',   weight: 0.10 },
+        { name: 'src',  weight: 0.05 },
+    ],
+    threshold: 0.15,
+    ignoreLocation: true,
+    useExtendedSearch: true,
+    minMatchCharLength: 2,
+};
+
+const filters = { query: '', category: null, provider: null };
+
+const CAT_COLORS = {
+    explosion:        '#dc3545',
+    impact:           '#fd7e14',
+    weapon:           '#842029',
+    foley:            '#795548',
+    footsteps:        '#a08060',
+    animal:           '#198754',
+    human:            '#20c997',
+    fire:             '#e25822',
+    weather:          '#0dcaf0',
+    vehicle:          '#4a90d9',
+    scifi:            '#6610f2',
+    ui:               '#6366f1',
+    music:            '#d63384',
+    drone:            '#5a23a5',
+    cinematic:        '#b08000',
+    horror:           '#343a40',
+    cartoon:          '#7aaa00',
+    nature:           '#2d9b27',
+    mechanical:       '#6c757d',
+    electricity:      '#ccaa00',
+    glass:            '#5baab8',
+    household:        '#c19a6b',
+    sports:           '#28a745',
+    magic:            '#7952b3',
+    underwater:       '#0077be',
+    impulse_response: '#0d9488',
+    instrument:       '#9c27b0',
+    ambience:         '#3a7abd',
+    other:            '#999999',
+};
+
 console.log("Initializing Sound Library...");
 
 function getRandomItems(arr, count) {
     const shuffled = [...arr].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
+}
+
+function formatDur(s) {
+    if (s < 1)  return '<1s';
+    if (s < 60) return Math.round(s) + 's';
+    const m = Math.floor(s / 60);
+    const sec = Math.round(s % 60);
+    return m + ':' + String(sec).padStart(2, '0');
+}
+
+function getResults() {
+    let pool = sfxData;
+
+    if (filters.category) pool = pool.filter(e => e.cat === filters.category);
+    if (filters.provider) pool = pool.filter(e => e.src === filters.provider);
+
+    const query = filters.query.trim();
+    const hasPreFilters = !!(filters.category || filters.provider);
+
+    if (query.length < 2) {
+        if (hasPreFilters) return pool;
+        return getRandomItems(pool, 50);
+    }
+
+    if (pool === sfxData && fuse) {
+        return fuse.search(query).map(r => r.item);
+    }
+    return new Fuse(pool, fuseOptions).search(query).map(r => r.item);
+}
+
+function buildChips() {
+    const catCounts = {};
+    const srcCounts = {};
+    sfxData.forEach(e => {
+        const c = e.cat || 'other';
+        catCounts[c] = (catCounts[c] || 0) + 1;
+        if (e.src) srcCounts[e.src] = (srcCounts[e.src] || 0) + 1;
+    });
+
+    const cats = Object.entries(catCounts).sort((a, b) => b[1] - a[1]).map(([c]) => c);
+    const srcs = Object.entries(srcCounts).sort((a, b) => b[1] - a[1]).map(([s]) => s);
+
+    const catContainer = document.getElementById('cat-chips');
+    if (catContainer) {
+        catContainer.innerHTML = [
+            `<button class="chip active" data-cat="">All Categories</button>`,
+            ...cats.map(c => {
+                const color = CAT_COLORS[c] || '#999';
+                const label = c.replace(/_/g, ' ');
+                return `<button class="chip" data-cat="${c}" style="--chip-color:${color}">${label} <span class="chip-count">${catCounts[c].toLocaleString()}</span></button>`;
+            })
+        ].join('');
+    }
+
+    const srcContainer = document.getElementById('src-chips');
+    if (srcContainer) {
+        srcContainer.innerHTML = [
+            `<button class="chip active" data-src="">All Sources</button>`,
+            ...srcs.map(s =>
+                `<button class="chip" data-src="${s}">${s} <span class="chip-count">${srcCounts[s].toLocaleString()}</span></button>`
+            )
+        ].join('');
+    }
+
+    document.querySelectorAll('[data-cat]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            filters.category = btn.dataset.cat || null;
+            document.querySelectorAll('[data-cat]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            refreshResults();
+        });
+    });
+
+    document.querySelectorAll('[data-src]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            filters.provider = btn.dataset.src || null;
+            document.querySelectorAll('[data-src]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            refreshResults();
+        });
+    });
+
+
+}
+
+function refreshResults() {
+    filters.query = searchInput ? searchInput.value : '';
+    const hasActivity = filters.query.trim().length >= 2 || filters.category || filters.provider;
+    displayResults(getResults(), !!hasActivity);
 }
 
 fetch('data.json')
@@ -20,13 +158,9 @@ fetch('data.json')
         const stats = document.getElementById('stats');
         if (stats) stats.innerText = `Library Loaded: ${data.length.toLocaleString()} Sounds`;
 
-        fuse = new Fuse(sfxData, {
-            keys: ['n', 'p'],
-            threshold: 0.1,          
-            ignoreLocation: true,    
-            useExtendedSearch: true  
-        });
+        fuse = new Fuse(sfxData, fuseOptions);
 
+        buildChips();
         displayResults(getRandomItems(sfxData, 50), false);
     })
     .catch(err => {
@@ -39,125 +173,128 @@ fetch('data.json')
     });
 
 const searchInput = document.getElementById('searchInput');
-const clearBtn = document.getElementById('clearSearch'); 
-const searchBtn = document.getElementById('searchBtn'); 
+const clearBtn    = document.getElementById('clearSearch');
+const searchBtn   = document.getElementById('searchBtn');
 
 function executeSearch() {
     if (!fuse) return;
-    
-    const query = searchInput.value;
-    
-    if (query.length < 2) {
+
+    filters.query = searchInput.value;
+
+    if (filters.query.length < 2 && !filters.category && !filters.provider && !filters.duration) {
         displayResults(getRandomItems(sfxData, 50), false);
         return;
     }
 
     const container = document.getElementById('results');
     container.innerHTML = `
-        <div style="display: flex; align-items: center; justify-content: center; gap: 15px; padding: 40px; color: var(--text-muted); font-size: 1.1em; font-weight: bold; width: 100%;">
+        <div style="display:flex;align-items:center;justify-content:center;gap:15px;padding:40px;color:var(--text-muted);font-size:1.1em;font-weight:bold;width:100%;">
             <div class="spinner"></div> Searching library...
         </div>
     `;
-    
+
     setTimeout(() => {
-        const results = fuse.search(query).map(r => r.item);
-        displayResults(results, true); 
+        displayResults(getResults(), true);
     }, 50);
 }
 
 if (searchInput) {
     searchInput.addEventListener('input', e => {
-        const query = e.target.value;
-        if (query.length > 0) {
-            clearBtn.style.display = 'block';
-        } else {
-            clearBtn.style.display = 'none';
-        }
+        clearBtn.style.display = e.target.value.length > 0 ? 'block' : 'none';
     });
 
     searchInput.addEventListener('keypress', e => {
         if (e.key === 'Enter') {
-            e.preventDefault(); 
+            e.preventDefault();
             executeSearch();
         }
     });
 }
 
-if (searchBtn) {
-    searchBtn.addEventListener('click', executeSearch);
-}
+if (searchBtn)  searchBtn.addEventListener('click', executeSearch);
 
 if (clearBtn) {
     clearBtn.addEventListener('click', () => {
-        searchInput.value = '';             
-        clearBtn.style.display = 'none';    
-        displayResults(getRandomItems(sfxData, 50), false); 
-        searchInput.focus();                
+        searchInput.value = '';
+        clearBtn.style.display = 'none';
+        filters.query = '';
+        refreshResults();
+        searchInput.focus();
     });
 }
+
+const MAX_DISPLAY = 200;
 
 function displayResults(items, isSearch = false) {
     const container = document.getElementById('results');
     if (!container) return;
 
     if (items.length === 0) {
-        container.innerHTML = "<p style='padding:20px; color:#666;'>No sounds found. Try a broader search term or different modifier.</p>";
+        container.innerHTML = "<p style='padding:20px;color:#666;'>No sounds found. Try a broader search term or adjust your filters.</p>";
         return;
     }
 
-    let summaryHtml = "";
-    if (isSearch) {
-        summaryHtml = `<div style="width: 100%; max-width: 900px; text-align: left; color: var(--text-muted); font-size: 0.85em; margin-bottom: 5px; padding-left: 5px; font-weight: bold;">Found ${items.length.toLocaleString()} result${items.length === 1 ? '' : 's'}</div>`;
+    const hasPreFilters = !!(filters.category || filters.provider || filters.duration);
+    const total = items.length;
+    const displayed = items.slice(0, MAX_DISPLAY);
+
+    let summaryText;
+    if (isSearch || hasPreFilters) {
+        summaryText = `Found ${total.toLocaleString()} result${total === 1 ? '' : 's'}`;
+        if (total > MAX_DISPLAY) summaryText += ` &mdash; showing first ${MAX_DISPLAY}`;
     } else {
-        summaryHtml = `<div style="width: 100%; max-width: 900px; text-align: left; color: var(--text-muted); font-size: 0.85em; margin-bottom: 5px; padding-left: 5px; font-style: italic;">Showing 50 random sounds to spark your creativity. Use the search bar to find more!</div>`;
+        summaryText = `Showing 50 random sounds to spark your creativity. Use the search bar to find more!`;
     }
 
-    const cardsHtml = items.map(item => {
+    const summaryHtml = `<div class="results-summary">${summaryText}</div>`;
+
+    const cardsHtml = displayed.map(item => {
         const ext = item.n.split('.').pop().toUpperCase();
+        const lastDot = item.n.lastIndexOf('.');
+        const displayName = lastDot !== -1 ? item.n.substring(0, lastDot) : item.n;
 
-        // --- NEW: Strip the extension from the display name ---
-        const lastDotIndex = item.n.lastIndexOf('.');
-        const displayName = lastDotIndex !== -1 ? item.n.substring(0, lastDotIndex) : item.n;
-
-        let displayPath = item.p;
-        
-        const prefix = "Sinclair/SFX Libraries/";
-        if (displayPath.startsWith(prefix)) {
-            displayPath = displayPath.slice(prefix.length);
-        }
-        
-        if (displayPath.endsWith(item.n)) {
-            displayPath = displayPath.slice(0, -item.n.length);
-        }
-        
-        if (displayPath.endsWith('/')) {
-            displayPath = displayPath.slice(0, -1);
-        }
-        
-        if (displayPath === "") {
-            displayPath = "Main Folder";
+        // Use enriched src/pk for path display; fall back to old path stripping
+        let displayPath;
+        if (item.src && item.pk && item.src !== item.pk) {
+            displayPath = `${item.src} &rsaquo; ${item.pk}`;
+        } else if (item.src) {
+            displayPath = item.src;
+        } else {
+            let dp = item.p;
+            const prefix = "Sinclair/SFX Libraries/";
+            if (dp.startsWith(prefix)) dp = dp.slice(prefix.length);
+            if (dp.endsWith(item.n)) dp = dp.slice(0, -item.n.length);
+            if (dp.endsWith('/')) dp = dp.slice(0, -1);
+            displayPath = dp || "Main Folder";
         }
 
-        const baseUrl = "https://sinclaircc-my.sharepoint.com/personal/adam_thompson7572_sinclair_edu/Documents/";
-        const encodedPath = encodeURIComponent(item.p); 
-        const originalUrl = baseUrl + encodedPath;
+        const baseUrl  = "https://sinclaircc-my.sharepoint.com/personal/adam_thompson7572_sinclair_edu/Documents/";
+        const encoded  = encodeURIComponent(item.p);
+        const origUrl  = baseUrl + encoded;
+        const previewUrl = origUrl + "?download=1";
+        const dlUrl    = `https://sinclaircc-my.sharepoint.com/personal/adam_thompson7572_sinclair_edu/_layouts/15/download.aspx?SourceUrl=${origUrl}`;
 
-        const previewUrl = originalUrl + "?download=1";
-        const dlUrl = `https://sinclaircc-my.sharepoint.com/personal/adam_thompson7572_sinclair_edu/_layouts/15/download.aspx?SourceUrl=${originalUrl}`;
+        const cat      = item.cat || 'other';
+        const catColor = CAT_COLORS[cat] || '#999';
+        const catLabel = cat.replace(/_/g, ' ');
+        const durBadge = item.dur !== undefined
+            ? `<span class="dur-badge">${formatDur(item.dur)}</span>`
+            : '';
 
-        // Notice the use of displayName in the span below!
         return `
-            <div class="card">
+            <div class="card" style="border-left-color:${catColor}">
                 <div class="info">
                     <div class="title-row">
                         <span class="file-badge">${ext}</span>
+                        <span class="cat-badge" style="background:${catColor}">${catLabel}</span>
                         <span class="name" title="${item.n}">${displayName}</span>
+                        ${durBadge}
                     </div>
                     <div class="path">${displayPath}</div>
                 </div>
                 <div class="actions">
-                    <a href="${previewUrl}" target="_blank" class="dl-btn preview-btn">▶ Preview</a>
-                    <a href="${dlUrl}" class="dl-btn">⬇ Download</a>
+                    <a href="${previewUrl}" target="_blank" class="dl-btn preview-btn">&#9654; Preview</a>
+                    <a href="${dlUrl}" class="dl-btn">&#11015; Download</a>
                 </div>
             </div>
         `;
