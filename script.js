@@ -57,6 +57,16 @@ function getRandomItems(arr, count) {
     return shuffled.slice(0, count);
 }
 
+const CAT_LABELS = {
+    scifi:            'Sci-Fi',
+    ui:               'UI',
+    impulse_response: 'Impulse Response',
+};
+
+function catLabel(c) {
+    return CAT_LABELS[c] || c.replace(/_/g, ' ').replace(/\b\w/g, ch => ch.toUpperCase());
+}
+
 function formatDur(s) {
     if (s < 1)  return '<1s';
     if (s < 60) return Math.round(s) + 's';
@@ -85,7 +95,7 @@ function getResults() {
     return new Fuse(pool, fuseOptions).search(query).map(r => r.item);
 }
 
-function buildChips() {
+function buildFilters() {
     const catCounts = {};
     const srcCounts = {};
     sfxData.forEach(e => {
@@ -94,50 +104,36 @@ function buildChips() {
         if (e.src) srcCounts[e.src] = (srcCounts[e.src] || 0) + 1;
     });
 
-    const cats = Object.entries(catCounts).sort((a, b) => b[1] - a[1]).map(([c]) => c);
-    const srcs = Object.entries(srcCounts).sort((a, b) => b[1] - a[1]).map(([s]) => s);
+    const cats = Object.entries(catCounts).sort((a, b) => b[1] - a[1]);
+    const srcs = Object.entries(srcCounts).sort((a, b) => b[1] - a[1]);
 
-    const catContainer = document.getElementById('cat-chips');
-    if (catContainer) {
-        catContainer.innerHTML = [
-            `<button class="chip active" data-cat="">All Categories</button>`,
-            ...cats.map(c => {
-                const color = CAT_COLORS[c] || '#999';
-                const label = c.replace(/_/g, ' ');
-                return `<button class="chip" data-cat="${c}" style="--chip-color:${color}">${label} <span class="chip-count">${catCounts[c].toLocaleString()}</span></button>`;
-            })
-        ].join('');
-    }
-
-    const srcContainer = document.getElementById('src-chips');
-    if (srcContainer) {
-        srcContainer.innerHTML = [
-            `<button class="chip active" data-src="">All Sources</button>`,
-            ...srcs.map(s =>
-                `<button class="chip" data-src="${s}">${s} <span class="chip-count">${srcCounts[s].toLocaleString()}</span></button>`
-            )
-        ].join('');
-    }
-
-    document.querySelectorAll('[data-cat]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            filters.category = btn.dataset.cat || null;
-            document.querySelectorAll('[data-cat]').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+    const catSelect = document.getElementById('cat-select');
+    if (catSelect) {
+        cats.forEach(([c, count]) => {
+            const opt = document.createElement('option');
+            opt.value = c;
+            opt.textContent = `${catLabel(c)} (${count.toLocaleString()})`;
+            catSelect.appendChild(opt);
+        });
+        catSelect.addEventListener('change', () => {
+            filters.category = catSelect.value || null;
             refreshResults();
         });
-    });
+    }
 
-    document.querySelectorAll('[data-src]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            filters.provider = btn.dataset.src || null;
-            document.querySelectorAll('[data-src]').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+    const srcSelect = document.getElementById('src-select');
+    if (srcSelect) {
+        srcs.forEach(([s, count]) => {
+            const opt = document.createElement('option');
+            opt.value = s;
+            opt.textContent = `${s} (${count.toLocaleString()})`;
+            srcSelect.appendChild(opt);
+        });
+        srcSelect.addEventListener('change', () => {
+            filters.provider = srcSelect.value || null;
             refreshResults();
         });
-    });
-
-
+    }
 }
 
 function refreshResults() {
@@ -160,7 +156,7 @@ fetch('data.json')
 
         fuse = new Fuse(sfxData, fuseOptions);
 
-        buildChips();
+        buildFilters();
         displayResults(getRandomItems(sfxData, 50), false);
     })
     .catch(err => {
@@ -276,7 +272,7 @@ function displayResults(items, isSearch = false) {
 
         const cat      = item.cat || 'other';
         const catColor = CAT_COLORS[cat] || '#999';
-        const catLabel = cat.replace(/_/g, ' ');
+        const catName  = catLabel(cat);
         const durBadge = item.dur !== undefined
             ? `<span class="dur-badge">${formatDur(item.dur)}</span>`
             : '';
@@ -286,7 +282,7 @@ function displayResults(items, isSearch = false) {
                 <div class="info">
                     <div class="title-row">
                         <span class="file-badge">${ext}</span>
-                        <span class="cat-badge" style="background:${catColor}">${catLabel}</span>
+                        <span class="cat-badge" style="background:${catColor}">${catName}</span>
                         <span class="name" title="${item.n}">${displayName}</span>
                         ${durBadge}
                     </div>
